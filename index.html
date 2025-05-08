@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Teste de Atenção</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px;
+      background-color: #f9f9f9;
+    }
+    canvas {
+      border: 2px solid #444;
+      cursor: crosshair;
+      margin-top: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #timer {
+      font-size: 24px;
+      margin: 20px 0;
+      color: black; /* Cor do timer em preto */
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-block;
+    }
+    #downloadBtn {
+      display: none;
+      background-color: #007bff;
+      color: white;
+    }
+    #uploadSection {
+      display: none;
+      margin-top: 40px;
+    }
+    #uploadSection button {
+      background-color: #007bff;
+      color: white;
+    }
+    #instrucoes {
+      max-width: 600px;
+      margin: auto;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Teste de Atenção</h1>
+
+  <div id="instrucoes">
+    Neste exercício, marque apenas as setas que estão exatamente iguais à seta exibida no topo da imagem.
+    Use o lápis para riscar ou destacar as setas diretamente na imagem abaixo.  
+    Você terá <strong>2 minutos</strong> para concluir a atividade.
+  </div>
+
+  <div id="timer">Tempo restante: 2:00</div>
+
+  <canvas id="canvas"></canvas>
+
+  <button id="downloadBtn">Baixar imagem com marcações</button>
+
+  <div id="uploadSection">
+    <h3>Envie sua imagem final:</h3>
+    <p>Ao terminar o teste, clique no botão abaixo para enviar sua imagem com as marcações:</p>
+    <a href="https://forms.gle/S9V5Jh9jQHuqnVHs9" target="_blank">
+      <button>Enviar imagem com marcações</button>
+    </a>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    const downloadBtn = document.getElementById('downloadBtn');
+    const uploadSection = document.getElementById('uploadSection');
+    let desenhando = false;
+    let tempoRestante = 120; // 2 minutos
+    let timerInterval;
+
+    img.onload = function () {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      iniciarContagemRegressiva();
+    };
+
+    img.src = 'imagem-teste.png'; // Nome da imagem no repositório
+
+    canvas.addEventListener('mousedown', function () {
+      if (tempoRestante <= 0) return;
+      desenhando = true;
+      ctx.beginPath();
+    });
+
+    canvas.addEventListener('mouseup', function () {
+      desenhando = false;
+    });
+
+    canvas.addEventListener('mousemove', function (event) {
+      if (desenhando && tempoRestante > 0) {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#007bff'; // Azul
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      }
+    });
+
+    function iniciarContagemRegressiva() {
+      const timerDisplay = document.getElementById('timer');
+      timerInterval = setInterval(() => {
+        tempoRestante--;
+        const minutos = Math.floor(tempoRestante / 60);
+        const segundos = tempoRestante % 60;
+        timerDisplay.textContent = `Tempo restante: ${minutos}:${segundos < 10 ? '0' : ''}${segundos}`;
+
+        if (tempoRestante <= 0) {
+          clearInterval(timerInterval);
+          timerDisplay.textContent = 'Tempo encerrado!';
+          desenhando = false;
+          downloadBtn.style.display = 'inline-block';
+          uploadSection.style.display = 'block';
+        }
+      }, 1000);
+    }
+
+    downloadBtn.addEventListener('click', function () {
+      const link = document.createElement('a');
+      link.download = 'teste-atencao-editado.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  </script>
+</body>
+</html>
