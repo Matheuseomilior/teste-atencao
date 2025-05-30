@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Teste de Atenção</title>
   <style>
     body {
@@ -50,40 +50,74 @@
       margin: auto;
       font-size: 18px;
     }
+
+    /* Tela inicial */
+    #telaInicial {
+      max-width: 600px;
+      margin: auto;
+      font-size: 22px;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
-  <h1>Teste de Atenção</h1>
-
-  <div id="instrucoes">
-    Neste exercício, marque apenas as setas que estão exatamente iguais à seta exibida no topo da imagem.
-    Use o lápis para riscar ou destacar as setas diretamente na imagem abaixo.  
-    Você terá <strong>2 minutos</strong> para concluir a atividade.
+  <!-- Tela inicial -->
+  <div id="telaInicial">
+    <h1>Teste de Atenção concentrada</h1>
+    <p>Clique no botão abaixo para começar o teste.</p>
+    <button id="btnComecar">Começar</button>
   </div>
 
-  <div id="timer">Tempo restante: 2:00</div>
+  <!-- Conteúdo do teste oculto inicialmente -->
+  <div id="conteudoTeste" style="display:none;">
+    <h1>Teste de Atenção</h1>
 
-  <canvas id="canvas"></canvas>
+    <div id="instrucoes">
+      Neste exercício, marque apenas as setas que estão exatamente iguais à seta exibida no topo da imagem.
+      Use o lápis para riscar ou destacar as setas diretamente na imagem abaixo.  
+      Você terá <strong>3 minutos e 30 segundos</strong> para concluir a atividade.
+    </div>
 
-  <button id="downloadBtn">Baixar imagem com marcações</button>
+    <div id="timer">Tempo restante: 3:30</div>
 
-  <div id="uploadSection">
-    <h3>Envie sua imagem final:</h3>
-    <p>Ao terminar o teste, clique no botão abaixo para enviar sua imagem com as marcações:</p>
-    <a href="https://forms.gle/S9V5Jh9jQHuqnVHs9" target="_blank">
-      <button>Enviar imagem com marcações</button>
-    </a>
+    <canvas id="canvas"></canvas>
+
+    <button id="downloadBtn">Baixar imagem com marcações</button>
+
+    <div id="uploadSection">
+      <h3>Envie sua imagem final:</h3>
+      <p>Ao terminar o teste, clique no botão abaixo para enviar sua imagem com as marcações:</p>
+      <a href="https://forms.gle/S9V5Jh9jQHuqnVHs9" target="_blank">
+        <button>Enviar imagem com marcações</button>
+      </a>
+    </div>
   </div>
 
   <script>
+    const btnComecar = document.getElementById('btnComecar');
+    const telaInicial = document.getElementById('telaInicial');
+    const conteudoTeste = document.getElementById('conteudoTeste');
+
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
     const downloadBtn = document.getElementById('downloadBtn');
     const uploadSection = document.getElementById('uploadSection');
     let desenhando = false;
-    let tempoRestante = 120; // 2 minutos
+    let tempoRestante = 210; // 3 minutos e 30 segundos (210 segundos)
     let timerInterval;
+
+    btnComecar.addEventListener('click', () => {
+      // Esconde tela inicial e mostra conteúdo do teste
+      telaInicial.style.display = 'none';
+      conteudoTeste.style.display = 'block';
+
+      // Carrega a imagem e inicia o teste
+      img.src = 'imagem-teste.png'; // Nome da imagem no repositório
+    });
 
     img.onload = function () {
       canvas.width = img.width;
@@ -91,8 +125,6 @@
       ctx.drawImage(img, 0, 0);
       iniciarContagemRegressiva();
     };
-
-    img.src = 'imagem-teste.png'; // Nome da imagem no repositório
 
     canvas.addEventListener('mousedown', function () {
       if (tempoRestante <= 0) return;
