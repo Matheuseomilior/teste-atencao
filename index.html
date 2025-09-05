@@ -104,7 +104,6 @@
     let tempoRestante = 0;
     let timerInterval;
     let desenhando = false;
-    let imagemCarregada = false;
     let pincelLiberado = false;
 
     const telaInicial = document.getElementById('telaInicial');
@@ -123,10 +122,10 @@
     const textoInstrucao = document.getElementById('textoInstrucao');
     const img = new Image();
 
-    btnComecar.addEventListener('click', () => {
+    btnComecar.onclick = () => {
       telaInicial.style.display = 'none';
       mostrarInstrucoes(etapaAtual);
-    });
+    };
 
     function mostrarInstrucoes(index) {
       tituloInstrucao.textContent = etapas[index].titulo;
@@ -135,29 +134,27 @@
       btnPronto.style.display = 'inline-block';
     }
 
-    btnPronto.addEventListener('click', () => {
+    btnPronto.onclick = () => {
       instrucoesEtapa.style.display = 'none';
       conteudoTeste.style.display = 'block';
       iniciarEtapa(etapaAtual);
-    });
+    };
 
     function iniciarEtapa(index) {
-      clearCanvas();
       pincelLiberado = true;
       downloadBtn.style.display = 'none';
       btnAvancar.style.display = 'none';
       tituloEtapa.textContent = etapas[index].titulo;
       tempoRestante = etapas[index].tempo;
       timerDisplay.textContent = formatarTempo(tempoRestante);
-      imagemCarregada = false;
       img.src = etapas[index].imagem;
     }
 
-    img.onload = function () {
+    img.onload = () => {
       canvas.width = img.width;
       canvas.height = img.height;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0);
-      imagemCarregada = true;
       iniciarContagemRegressiva();
     };
 
@@ -169,7 +166,6 @@
         if (tempoRestante <= 0) {
           clearInterval(timerInterval);
           timerDisplay.textContent = 'Tempo encerrado!';
-          desenhando = false;
           pincelLiberado = false;
           downloadBtn.style.display = 'inline-block';
         }
@@ -182,34 +178,31 @@
       return `Tempo restante: ${min}:${sec < 10 ? '0' : ''}${sec}`;
     }
 
-    canvas.addEventListener('mousedown', () => {
-      if (tempoRestante <= 0 || !pincelLiberado) return;
+    canvas.onmousedown = (e) => {
+      if (!pincelLiberado || tempoRestante <= 0) return;
       desenhando = true;
       ctx.beginPath();
-    });
+    };
 
-    canvas.addEventListener('mouseup', () => {
+    canvas.onmouseup = () => {
       desenhando = false;
-    });
+    };
 
-    canvas.addEventListener('mousemove', (event) => {
-      if (desenhando && tempoRestante > 0 && pincelLiberado) {
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#007bff';
-        ctx.lineTo(x, y);
-        ctx.stroke();
-      }
-    });
+    canvas.onmousemove = (e) => {
+      if (!desenhando || tempoRestante <= 0 || !pincelLiberado) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#007bff';
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    };
 
-    downloadBtn.onclick = function () {
-      if (!imagemCarregada) {
-        alert("A imagem ainda não foi carregada corretamente. Tente novamente.");
-        return;
-      }
-
-      try {
-        const imagemFinal = canvas.toDataURL('image
+    downloadBtn.onclick = () => {
+      const link = document.createElement('a');
+      link.download = `etapa-${etapaAtual + 1}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      btnAvancar.style.display = 'inline
