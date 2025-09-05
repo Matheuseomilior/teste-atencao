@@ -31,13 +31,13 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-    }
-    #downloadBtn, #btnAvancar {
-      display: none;
       background-color: #007bff;
       color: white;
     }
-    #telaInicial, #paginaFinal {
+    #downloadBtn, #btnAvancar, #btnPronto {
+      display: none;
+    }
+    #telaInicial, #paginaFinal, #instrucoesEtapa {
       max-width: 700px;
       margin: auto;
       font-size: 18px;
@@ -53,16 +53,18 @@
   <div id="telaInicial">
     <h1>Teste de Atenção</h1>
     <p>Este teste será dividido em 3 etapas, cada uma focando em um tipo diferente de atenção.</p>
-    <p><strong>Etapa 1 – Atenção Concentrada:</strong></p>
-    <p>Você precisa localizar, em cada linha, o esquilo que está no topo e marcá-lo.</p>
-    <p><strong>Tempo:</strong> 2 minutos</p>
-    <p><strong>Importante:</strong> Não é a velocidade que importa, e sim a precisão. Faça uma linha por vez, da esquerda para a direita, de cima para baixo.</p>
     <button id="btnComecar">Começar</button>
   </div>
 
+  <div id="instrucoesEtapa" style="display:none;">
+    <h2 id="tituloInstrucao"></h2>
+    <p id="textoInstrucao"></p>
+    <button id="btnPronto">Pronto</button>
+  </div>
+
   <div id="conteudoTeste" style="display:none;">
-    <h2 id="tituloEtapa">Etapa 1</h2>
-    <div id="timer">Tempo restante: 2:00</div>
+    <h2 id="tituloEtapa">Etapa</h2>
+    <div id="timer">Tempo restante</div>
     <canvas id="canvas"></canvas>
     <button id="downloadBtn">Baixar imagem com marcações</button>
     <button id="btnAvancar">➡️ Próxima etapa</button>
@@ -78,9 +80,24 @@
 
   <script>
     const etapas = [
-      { imagem: 'etapa1.png', tempo: 120, titulo: 'Etapa 1 – Atenção Concentrada' },
-      { imagem: 'etapa2.png', tempo: 240, titulo: 'Etapa 2 – Atenção Alternada' },
-      { imagem: 'etapa3.png', tempo: 150, titulo: 'Etapa 3 – Atenção Dividida' }
+      {
+        imagem: 'etapa1.png',
+        tempo: 120,
+        titulo: 'Etapa 1 – Atenção Concentrada',
+        instrucao: 'Localize, em cada linha, o Allen que está no topo e marque-o usando alguma ferramenta de desenho. Você terá 2 minutos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Não se preocupe com a velocidade, concentre-se na precisão.'
+      },
+      {
+        imagem: 'etapa2.png',
+        tempo: 240,
+        titulo: 'Etapa 2 – Atenção Dividida',
+        instrucao: 'Localize, em cada linha, os elementos que estão no topo e marque-os. Você terá 4 minutos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Foque na atenção, não na velocidade.'
+      },
+      {
+        imagem: 'etapa3.png',
+        tempo: 150,
+        titulo: 'Etapa 3 – Atenção Alternada',
+        instrucao: 'Localize, em cada linha, o elemento que aparece antes da seta e marque-o. Você terá 2 minutos e 30 segundos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Atenção é mais importante que rapidez.'
+      }
     ];
 
     let etapaAtual = 0;
@@ -88,27 +105,44 @@
     let timerInterval;
     let desenhando = false;
     let imagemCarregada = false;
+    let pincelLiberado = false;
 
     const telaInicial = document.getElementById('telaInicial');
+    const instrucoesEtapa = document.getElementById('instrucoesEtapa');
     const conteudoTeste = document.getElementById('conteudoTeste');
     const paginaFinal = document.getElementById('paginaFinal');
     const btnComecar = document.getElementById('btnComecar');
+    const btnPronto = document.getElementById('btnPronto');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const timerDisplay = document.getElementById('timer');
     const downloadBtn = document.getElementById('downloadBtn');
     const btnAvancar = document.getElementById('btnAvancar');
     const tituloEtapa = document.getElementById('tituloEtapa');
+    const tituloInstrucao = document.getElementById('tituloInstrucao');
+    const textoInstrucao = document.getElementById('textoInstrucao');
     const img = new Image();
 
     btnComecar.addEventListener('click', () => {
       telaInicial.style.display = 'none';
+      mostrarInstrucoes(etapaAtual);
+    });
+
+    function mostrarInstrucoes(index) {
+      tituloInstrucao.textContent = etapas[index].titulo;
+      textoInstrucao.textContent = etapas[index].instrucao;
+      instrucoesEtapa.style.display = 'block';
+    }
+
+    btnPronto.addEventListener('click', () => {
+      instrucoesEtapa.style.display = 'none';
       conteudoTeste.style.display = 'block';
       iniciarEtapa(etapaAtual);
     });
 
     function iniciarEtapa(index) {
       clearCanvas();
+      pincelLiberado = true;
       downloadBtn.style.display = 'none';
       btnAvancar.style.display = 'none';
       tituloEtapa.textContent = etapas[index].titulo;
@@ -135,6 +169,7 @@
           clearInterval(timerInterval);
           timerDisplay.textContent = 'Tempo encerrado!';
           desenhando = false;
+          pincelLiberado = false;
           downloadBtn.style.display = 'inline-block';
         }
       }, 1000);
@@ -147,7 +182,7 @@
     }
 
     canvas.addEventListener('mousedown', () => {
-      if (tempoRestante <= 0) return;
+      if (tempoRestante <= 0 || !pincelLiberado) return;
       desenhando = true;
       ctx.beginPath();
     });
@@ -157,7 +192,7 @@
     });
 
     canvas.addEventListener('mousemove', (event) => {
-      if (desenhando && tempoRestante > 0) {
+      if (desenhando && tempoRestante > 0 && pincelLiberado) {
         const rect = canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
@@ -176,38 +211,3 @@
       }
 
       try {
-        const imagemFinal = canvas.toDataURL('image/png');
-        if (imagemFinal === 'data:,') {
-          alert("O canvas está vazio. Tente novamente.");
-          return;
-        }
-
-        const link = document.createElement('a');
-        link.href = imagemFinal;
-        link.download = `etapa-${etapaAtual + 1}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        btnAvancar.style.display = 'inline-block';
-      } catch (e) {
-        alert("Ocorreu um erro ao tentar baixar a imagem. Tente novamente.");
-        console.error(e);
-      }
-    };
-
-    btnAvancar.addEventListener('click', () => {
-      etapaAtual++;
-      if (etapaAtual < etapas.length) {
-        iniciarEtapa(etapaAtual);
-      } else {
-        conteudoTeste.style.display = 'none';
-        paginaFinal.style.display = 'block';
-      }
-    });
-
-    function clearCanvas() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-  </script>
-</body>
-</html>
