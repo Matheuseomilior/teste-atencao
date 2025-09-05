@@ -132,6 +132,7 @@
       tituloInstrucao.textContent = etapas[index].titulo;
       textoInstrucao.textContent = etapas[index].instrucao;
       instrucoesEtapa.style.display = 'block';
+      btnPronto.style.display = 'inline-block';
     }
 
     btnPronto.addEventListener('click', () => {
@@ -211,3 +212,4 @@
       }
 
       try {
+        const imagemFinal = canvas.toDataURL('image
