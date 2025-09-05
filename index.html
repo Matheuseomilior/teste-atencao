@@ -49,19 +49,16 @@
   </style>
 </head>
 <body>
-
   <div id="telaInicial">
     <h1>Teste de Atenção</h1>
     <p>Este teste será dividido em 3 etapas, cada uma focando em um tipo diferente de atenção.</p>
     <button id="btnComecar">Começar</button>
   </div>
-
   <div id="instrucoesEtapa" style="display:none;">
     <h2 id="tituloInstrucao"></h2>
     <p id="textoInstrucao"></p>
     <button id="btnPronto">Pronto</button>
   </div>
-
   <div id="conteudoTeste" style="display:none;">
     <h2 id="tituloEtapa">Etapa</h2>
     <div id="timer">Tempo restante</div>
@@ -69,7 +66,6 @@
     <button id="downloadBtn">Baixar imagem com marcações</button>
     <button id="btnAvancar">➡️ Próxima etapa</button>
   </div>
-
   <div id="paginaFinal" style="display:none;">
     <h2>Parabéns! Você concluiu todas as etapas.</h2>
     <p>Agora envie suas imagens com as marcações clicando no botão abaixo:</p>
@@ -77,7 +73,6 @@
       <button>Enviar imagens</button>
     </a>
   </div>
-
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const etapas = [
@@ -100,13 +95,13 @@
           instrucao: 'Localize, em cada linha, o elemento que aparece antes da seta e marque-o. Você terá 2 minutos e 30 segundos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Atenção é mais importante que rapidez.'
         }
       ];
-
       let etapaAtual = 0;
       let tempoRestante = 0;
       let timerInterval;
       let desenhando = false;
       let pincelLiberado = false;
 
+      // Elementos
       const telaInicial = document.getElementById('telaInicial');
       const instrucoesEtapa = document.getElementById('instrucoesEtapa');
       const conteudoTeste = document.getElementById('conteudoTeste');
@@ -123,11 +118,13 @@
       const textoInstrucao = document.getElementById('textoInstrucao');
       const img = new Image();
 
+      // Começar teste
       btnComecar.onclick = () => {
         telaInicial.style.display = 'none';
         mostrarInstrucoes(etapaAtual);
       };
 
+      // Mostrar instruções
       function mostrarInstrucoes(index) {
         tituloInstrucao.textContent = etapas[index].titulo;
         textoInstrucao.textContent = etapas[index].instrucao;
@@ -135,12 +132,14 @@
         btnPronto.style.display = 'inline-block';
       }
 
+      // Pronto para iniciar etapa
       btnPronto.onclick = () => {
         instrucoesEtapa.style.display = 'none';
         conteudoTeste.style.display = 'block';
         iniciarEtapa(etapaAtual);
       };
 
+      // Iniciar etapa
       function iniciarEtapa(index) {
         pincelLiberado = false;
         downloadBtn.style.display = 'none';
@@ -160,6 +159,7 @@
         iniciarContagemRegressiva();
       };
 
+      // Contagem regressiva do timer
       function iniciarContagemRegressiva() {
         clearInterval(timerInterval);
         timerInterval = setInterval(() => {
@@ -174,22 +174,22 @@
         }, 1000);
       }
 
+      // Formatar tempo mm:ss
       function formatarTempo(segundos) {
         const min = Math.floor(segundos / 60);
         const sec = segundos % 60;
         return `Tempo restante: ${min}:${sec < 10 ? '0' : ''}${sec}`;
       }
 
+      // Desenho no canvas
       canvas.onmousedown = () => {
         if (!pincelLiberado || tempoRestante <= 0) return;
         desenhando = true;
         ctx.beginPath();
       };
-
       canvas.onmouseup = () => {
         desenhando = false;
       };
-
       canvas.onmousemove = (e) => {
         if (!desenhando || tempoRestante <= 0 || !pincelLiberado) return;
         const rect = canvas.getBoundingClientRect();
@@ -202,6 +202,7 @@
         ctx.stroke();
       };
 
+      // Baixar imagem marcada
       downloadBtn.onclick = () => {
         const link = document.createElement('a');
         link.download = `etapa-${etapaAtual + 1}.png`;
@@ -210,8 +211,18 @@
         btnAvancar.style.display = 'inline-block';
       };
 
+      // Avançar para próxima etapa
       btnAvancar.onclick = () => {
         etapaAtual++;
         if (etapaAtual < etapas.length) {
           conteudoTeste.style.display = 'none';
-          mostrarInstrucoes(etapaAtual
+          mostrarInstrucoes(etapaAtual);
+        } else {
+          conteudoTeste.style.display = 'none';
+          paginaFinal.style.display = 'block';
+        }
+      };
+    });
+  </script>
+</body>
+</html>
