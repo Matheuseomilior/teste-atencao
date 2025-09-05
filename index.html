@@ -87,6 +87,7 @@
     let tempoRestante = 0;
     let timerInterval;
     let desenhando = false;
+    let imagemCarregada = false;
 
     const telaInicial = document.getElementById('telaInicial');
     const conteudoTeste = document.getElementById('conteudoTeste');
@@ -113,6 +114,7 @@
       tituloEtapa.textContent = etapas[index].titulo;
       tempoRestante = etapas[index].tempo;
       timerDisplay.textContent = formatarTempo(tempoRestante);
+      imagemCarregada = false;
       img.src = etapas[index].imagem;
     }
 
@@ -120,6 +122,7 @@
       canvas.width = img.width;
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0);
+      imagemCarregada = true;
       iniciarContagemRegressiva();
     };
 
@@ -167,8 +170,18 @@
     });
 
     downloadBtn.onclick = function () {
+      if (!imagemCarregada) {
+        alert("A imagem ainda não foi carregada corretamente. Tente novamente.");
+        return;
+      }
+
       try {
         const imagemFinal = canvas.toDataURL('image/png');
+        if (imagemFinal === 'data:,') {
+          alert("O canvas está vazio. Tente novamente.");
+          return;
+        }
+
         const link = document.createElement('a');
         link.href = imagemFinal;
         link.download = `etapa-${etapaAtual + 1}.png`;
