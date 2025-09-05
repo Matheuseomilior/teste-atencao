@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <title>Teste de Atenção</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Poppins', sans-serif;
       text-align: center;
       padding: 40px;
-      background-color: #f9f9f9;
+      background-color: #e6f2ff;
     }
     canvas {
       border: 2px solid #444;
@@ -21,7 +22,7 @@
     #timer {
       font-size: 24px;
       margin: 20px 0;
-      color: black; /* Cor do timer em preto */
+      color: black;
     }
     button {
       margin-top: 20px;
@@ -30,32 +31,16 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      display: inline-block;
     }
-    #downloadBtn {
+    #downloadBtn, #btnAvancar {
       display: none;
       background-color: #007bff;
       color: white;
     }
-    #uploadSection {
-      display: none;
-      margin-top: 40px;
-    }
-    #uploadSection button {
-      background-color: #007bff;
-      color: white;
-    }
-    #instrucoes {
-      max-width: 600px;
+    #telaInicial, #paginaFinal {
+      max-width: 700px;
       margin: auto;
       font-size: 18px;
-    }
-
-    /* Tela inicial */
-    #telaInicial {
-      max-width: 600px;
-      margin: auto;
-      font-size: 22px;
       padding: 20px;
       background-color: white;
       border-radius: 8px;
@@ -64,60 +49,72 @@
   </style>
 </head>
 <body>
-  <!-- Tela inicial -->
+
   <div id="telaInicial">
-    <h1>Teste de atenção concentrada</h1>
-    <p>Clique no botão abaixo para começar o teste.</p>
+    <h1>Teste de Atenção</h1>
+    <p>Este teste será dividido em 3 etapas, cada uma focando em um tipo diferente de atenção.</p>
+    <p><strong>Etapa 1 – Atenção Concentrada:</strong></p>
+    <p>Você precisa localizar, em cada linha, o esquilo que está no topo e marcá-lo.</p>
+    <p><strong>Tempo:</strong> 2 minutos</p>
+    <p><strong>Importante:</strong> Não é a velocidade que importa, e sim a precisão. Faça uma linha por vez, da esquerda para a direita, de cima para baixo.</p>
     <button id="btnComecar">Começar</button>
   </div>
 
-  <!-- Conteúdo do teste oculto inicialmente -->
   <div id="conteudoTeste" style="display:none;">
-    <h1>Teste de Atenção</h1>
-
-    <div id="instrucoes">
-      Neste exercício, marque apenas as setas que estão exatamente iguais à seta exibida no topo da imagem.
-      Use o lápis para riscar ou destacar as setas diretamente na imagem abaixo.  
-      Você terá <strong>3 minutos e 30 segundos</strong> para concluir a atividade.
-    </div>
-
-    <div id="timer">Tempo restante: 3:30</div>
-
+    <h2 id="tituloEtapa">Etapa 1</h2>
+    <div id="timer">Tempo restante: 2:00</div>
     <canvas id="canvas"></canvas>
-
     <button id="downloadBtn">Baixar imagem com marcações</button>
+    <button id="btnAvancar">➡️ Próxima etapa</button>
+  </div>
 
-    <div id="uploadSection">
-      <h3>Envie sua imagem final:</h3>
-      <p>Ao terminar o teste, clique no botão abaixo para enviar sua imagem com as marcações:</p>
-      <a href="https://forms.gle/S9V5Jh9jQHuqnVHs9" target="_blank">
-        <button>Enviar imagem com marcações</button>
-      </a>
-    </div>
+  <div id="paginaFinal" style="display:none;">
+    <h2>Parabéns! Você concluiu todas as etapas.</h2>
+    <p>Agora envie suas imagens com as marcações clicando no botão abaixo:</p>
+    <a href="https://forms.gle/S9V5Jh9jQHuqnVHs9" target="_blank">
+      <button>Enviar imagens</button>
+    </a>
   </div>
 
   <script>
-    const btnComecar = document.getElementById('btnComecar');
+    const etapas = [
+      { imagem: 'https://imgur.com/O7jTmuj.png', tempo: 120, titulo: 'Etapa 1 – Atenção Concentrada' },
+      { imagem: 'https://imgur.com/xNvJWFx.png', tempo: 240, titulo: 'Etapa 2 – Atenção Alternada' },
+      { imagem: 'https://imgur.com/DO0UhqA.png', tempo: 150, titulo: 'Etapa 3 – Atenção Dividida' }
+    ];
+
+    let etapaAtual = 0;
+    let tempoRestante = 0;
+    let timerInterval;
+    let desenhando = false;
+
     const telaInicial = document.getElementById('telaInicial');
     const conteudoTeste = document.getElementById('conteudoTeste');
-
+    const paginaFinal = document.getElementById('paginaFinal');
+    const btnComecar = document.getElementById('btnComecar');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const img = new Image();
+    const timerDisplay = document.getElementById('timer');
     const downloadBtn = document.getElementById('downloadBtn');
-    const uploadSection = document.getElementById('uploadSection');
-    let desenhando = false;
-    let tempoRestante = 210; // 3 minutos e 30 segundos (210 segundos)
-    let timerInterval;
+    const btnAvancar = document.getElementById('btnAvancar');
+    const tituloEtapa = document.getElementById('tituloEtapa');
+    const img = new Image();
 
     btnComecar.addEventListener('click', () => {
-      // Esconde tela inicial e mostra conteúdo do teste
       telaInicial.style.display = 'none';
       conteudoTeste.style.display = 'block';
-
-      // Carrega a imagem e inicia o teste
-      img.src = 'imagem-teste.png'; // Nome da imagem no repositório
+      iniciarEtapa(etapaAtual);
     });
+
+    function iniciarEtapa(index) {
+      clearCanvas();
+      downloadBtn.style.display = 'none';
+      btnAvancar.style.display = 'none';
+      tituloEtapa.textContent = etapas[index].titulo;
+      tempoRestante = etapas[index].tempo;
+      timerDisplay.textContent = formatarTempo(tempoRestante);
+      img.src = etapas[index].imagem;
+    }
 
     img.onload = function () {
       canvas.width = img.width;
@@ -126,53 +123,70 @@
       iniciarContagemRegressiva();
     };
 
-    canvas.addEventListener('mousedown', function () {
+    function iniciarContagemRegressiva() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        tempoRestante--;
+        timerDisplay.textContent = formatarTempo(tempoRestante);
+        if (tempoRestante <= 0) {
+          clearInterval(timerInterval);
+          timerDisplay.textContent = 'Tempo encerrado!';
+          desenhando = false;
+          downloadBtn.style.display = 'inline-block';
+        }
+      }, 1000);
+    }
+
+    function formatarTempo(segundos) {
+      const min = Math.floor(segundos / 60);
+      const sec = segundos % 60;
+      return `Tempo restante: ${min}:${sec < 10 ? '0' : ''}${sec}`;
+    }
+
+    canvas.addEventListener('mousedown', () => {
       if (tempoRestante <= 0) return;
       desenhando = true;
       ctx.beginPath();
     });
 
-    canvas.addEventListener('mouseup', function () {
+    canvas.addEventListener('mouseup', () => {
       desenhando = false;
     });
 
-    canvas.addEventListener('mousemove', function (event) {
+    canvas.addEventListener('mousemove', (event) => {
       if (desenhando && tempoRestante > 0) {
         const rect = canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
         ctx.lineWidth = 2;
         ctx.lineCap = 'round';
-        ctx.strokeStyle = '#007bff'; // Azul
+        ctx.strokeStyle = '#007bff';
         ctx.lineTo(x, y);
         ctx.stroke();
       }
     });
 
-    function iniciarContagemRegressiva() {
-      const timerDisplay = document.getElementById('timer');
-      timerInterval = setInterval(() => {
-        tempoRestante--;
-        const minutos = Math.floor(tempoRestante / 60);
-        const segundos = tempoRestante % 60;
-        timerDisplay.textContent = `Tempo restante: ${minutos}:${segundos < 10 ? '0' : ''}${segundos}`;
-
-        if (tempoRestante <= 0) {
-          clearInterval(timerInterval);
-          timerDisplay.textContent = 'Tempo encerrado!';
-          desenhando = false;
-          downloadBtn.style.display = 'inline-block';
-          uploadSection.style.display = 'block';
-        }
-      }, 1000);
-    }
-
-    downloadBtn.addEventListener('click', function () {
+    downloadBtn.addEventListener('click', () => {
       const link = document.createElement('a');
-      link.download = 'teste-atencao-editado.png';
+      link.download = `etapa-${etapaAtual + 1}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
+      btnAvancar.style.display = 'inline-block';
     });
+
+    btnAvancar.addEventListener('click', () => {
+      etapaAtual++;
+      if (etapaAtual < etapas.length) {
+        iniciarEtapa(etapaAtual);
+      } else {
+        conteudoTeste.style.display = 'none';
+        paginaFinal.style.display = 'block';
+      }
+    });
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
   </script>
 </body>
 </html>
