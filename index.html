@@ -78,9 +78,9 @@
 
   <script>
     const etapas = [
-      { imagem: 'https://imgur.com/O7jTmuj.png', tempo: 120, titulo: 'Etapa 1 – Atenção Concentrada' },
-      { imagem: 'https://imgur.com/xNvJWFx.png', tempo: 240, titulo: 'Etapa 2 – Atenção Alternada' },
-      { imagem: 'https://imgur.com/DO0UhqA.png', tempo: 150, titulo: 'Etapa 3 – Atenção Dividida' }
+      { imagem: 'https://i.imgur.com/O7jTmuj.png', tempo: 120, titulo: 'Etapa 1 – Atenção Concentrada' },
+      { imagem: 'https://i.imgur.com/xNvJWFx.png', tempo: 240, titulo: 'Etapa 2 – Atenção Alternada' },
+      { imagem: 'https://i.imgur.com/DO0UhqA.png', tempo: 150, titulo: 'Etapa 3 – Atenção Dividida' }
     ];
 
     let etapaAtual = 0;
@@ -166,13 +166,21 @@
       }
     });
 
-    downloadBtn.addEventListener('click', () => {
-      const link = document.createElement('a');
-      link.download = `etapa-${etapaAtual + 1}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      btnAvancar.style.display = 'inline-block';
-    });
+    downloadBtn.onclick = function () {
+      try {
+        const imagemFinal = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = imagemFinal;
+        link.download = `etapa-${etapaAtual + 1}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        btnAvancar.style.display = 'inline-block';
+      } catch (e) {
+        alert("Ocorreu um erro ao tentar baixar a imagem. Tente novamente.");
+        console.error(e);
+      }
+    };
 
     btnAvancar.addEventListener('click', () => {
       etapaAtual++;
