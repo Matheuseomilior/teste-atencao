@@ -78,19 +78,19 @@
       const etapas = [
         {
           imagem: 'etapa1.png',
-          tempo: 120,
+          tempo: 60,
           titulo: 'Etapa 1 – Atenção Concentrada',
           instrucao: 'Localize, em cada linha, o esquilo que está no topo da imagem e marque-o utilizando a ferramenta de desenho. Você terá 2 minutos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Não se preocupe com a velocidade, concentre-se na precisão.'
         },
         {
           imagem: 'etapa2.png',
-          tempo: 240,
+          tempo: 180,
           titulo: 'Etapa 2 – Atenção Dividida',
           instrucao: 'Localize, em cada linha, os elementos identicos aos que estão no topo da imagem e marque-os utilizando a ferramenta de desenho. Você terá 4 minutos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Foque na atenção, não na velocidade.'
         },
         {
           imagem: 'etapa3.png',
-          tempo: 150,
+          tempo: 120,
           titulo: 'Etapa 3 – Atenção Alternada',
           instrucao: 'Localize, em cada linha, o elemento igual ao que aparece antes da seta e marque-o. Você terá 2 minutos e 30 segundos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Atenção é mais importante que rapidez.'
         }
@@ -195,9 +195,9 @@
         const rect = canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        ctx.lineWidth = 6;
+        ctx.lineWidth = 8;
         ctx.lineCap = 'round';
-        ctx.strokeStyle = '#007bff';
+        ctx.strokeStyle = '#0026ff';
         ctx.lineTo(x, y);
         ctx.stroke();
       };
