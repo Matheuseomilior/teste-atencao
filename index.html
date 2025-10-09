@@ -211,4 +211,43 @@
         e.preventDefault();
       });
 
-      canvas.addEventListener('touchmove
+      canvas.addEventListener('touchmovecanvas.addEventListener('touchmove', (e) => {
+        if (!desenhando || tempoRestante <= 0 || !pincelLiberado) return;
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        ctx.lineWidth = 8;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#0026ff';
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        e.preventDefault();
+      });
+
+      canvas.addEventListener('touchend', () => {
+        desenhando = false;
+      });
+
+      downloadBtn.onclick = () => {
+        const link = document.createElement('a');
+        link.download = `etapa-${etapaAtual + 1}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        btnAvancar.style.display = 'inline-block';
+      };
+
+      btnAvancar.onclick = () => {
+        etapaAtual++;
+        if (etapaAtual < etapas.length) {
+          conteudoTeste.style.display = 'none';
+          mostrarInstrucoes(etapaAtual);
+        } else {
+          conteudoTeste.style.display = 'none';
+          paginaFinal.style.display = 'block';
+        }
+      };
+    });
+  </script>
+</body>
+</html>
