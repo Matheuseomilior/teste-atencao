@@ -1,3 +1,10 @@
+Claro, Matheus! Aqui está o código HTML completo do seu teste de atenção, agora com suporte para dispositivos móveis e desktop. Ele inclui os eventos de toque (`touchstart`, `touchmove`, `touchend`) além dos eventos de mouse, garantindo que o desenho funcione em celulares e tablets:
+
+---
+
+### ✅ Código HTML atualizado
+
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -18,6 +25,9 @@
       display: block;
       margin-left: auto;
       margin-right: auto;
+      max-width: 100%;
+      height: auto;
+      touch-action: none;
     }
     #timer {
       font-size: 24px;
@@ -86,7 +96,7 @@
           imagem: 'etapa2.png',
           tempo: 180,
           titulo: 'Etapa 2 – Atenção Dividida',
-          instrucao: 'Localize, em cada linha, os elementos identicos aos que estão no topo da imagem e marque-os utilizando a ferramenta de desenho. Você terá 3 minutos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Foque na atenção, não na velocidade.'
+          instrucao: 'Localize, em cada linha, os elementos idênticos aos que estão no topo da imagem e marque-os utilizando a ferramenta de desenho. Você terá 3 minutos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Foque na atenção, não na velocidade.'
         },
         {
           imagem: 'etapa3.png',
@@ -101,7 +111,6 @@
       let desenhando = false;
       let pincelLiberado = false;
 
-      // Elementos
       const telaInicial = document.getElementById('telaInicial');
       const instrucoesEtapa = document.getElementById('instrucoesEtapa');
       const conteudoTeste = document.getElementById('conteudoTeste');
@@ -118,13 +127,11 @@
       const textoInstrucao = document.getElementById('textoInstrucao');
       const img = new Image();
 
-      // Começar teste
       btnComecar.onclick = () => {
         telaInicial.style.display = 'none';
         mostrarInstrucoes(etapaAtual);
       };
 
-      // Mostrar instruções
       function mostrarInstrucoes(index) {
         tituloInstrucao.textContent = etapas[index].titulo;
         textoInstrucao.textContent = etapas[index].instrucao;
@@ -132,14 +139,12 @@
         btnPronto.style.display = 'inline-block';
       }
 
-      // Pronto para iniciar etapa
       btnPronto.onclick = () => {
         instrucoesEtapa.style.display = 'none';
         conteudoTeste.style.display = 'block';
         iniciarEtapa(etapaAtual);
       };
 
-      // Iniciar etapa
       function iniciarEtapa(index) {
         pincelLiberado = false;
         downloadBtn.style.display = 'none';
@@ -159,7 +164,6 @@
         iniciarContagemRegressiva();
       };
 
-      // Contagem regressiva do timer
       function iniciarContagemRegressiva() {
         clearInterval(timerInterval);
         timerInterval = setInterval(() => {
@@ -174,18 +178,18 @@
         }, 1000);
       }
 
-      // Formatar tempo mm:ss
       function formatarTempo(segundos) {
         const min = Math.floor(segundos / 60);
         const sec = segundos % 60;
         return `Tempo restante: ${min}:${sec < 10 ? '0' : ''}${sec}`;
       }
 
-      // Desenho no canvas
-      canvas.onmousedown = () => {
+      canvas.onmousedown = (e) => {
         if (!pincelLiberado || tempoRestante <= 0) return;
         desenhando = true;
         ctx.beginPath();
+        const rect = canvas.getBoundingClientRect();
+        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
       };
       canvas.onmouseup = () => {
         desenhando = false;
@@ -202,27 +206,16 @@
         ctx.stroke();
       };
 
-      // Baixar imagem marcada
-      downloadBtn.onclick = () => {
-        const link = document.createElement('a');
-        link.download = `etapa-${etapaAtual + 1}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        btnAvancar.style.display = 'inline-block';
-      };
+      canvas.addEventListener('touchstart', (e) => {
+        if (!pincelLiberado || tempoRestante <= 0) return;
+        desenhando = true;
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        e.preventDefault();
+      });
 
-      // Avançar para próxima etapa
-      btnAvancar.onclick = () => {
-        etapaAtual++;
-        if (etapaAtual < etapas.length) {
-          conteudoTeste.style.display = 'none';
-          mostrarInstrucoes(etapaAtual);
-        } else {
-          conteudoTeste.style.display = 'none';
-          paginaFinal.style.display = 'block';
-        }
-      };
-    });
-  </script>
-</body>
-</html>
+      canvas.addEventListener('touchmove
