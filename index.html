@@ -1,284 +1,198 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Teste de Atenção</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      text-align: center;
-      padding: 40px;
-      background-color: #e6f2ff;
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const etapas = [
+    {
+      imagem: 'etapa1.png',
+      tempo: 60,
+      titulo: 'Etapa 1 – Atenção Concentrada',
+      instrucao:
+        'Localize, em cada linha, o esquilo que está no topo da imagem e marque-o utilizando a ferramenta de desenho. Você terá 1 minuto. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Não se preocupe com a velocidade, concentre-se na precisão.'
+    },
+    {
+      imagem: 'etapa2.png',
+      tempo: 180,
+      titulo: 'Etapa 2 – Atenção Dividida',
+      instrucao:
+        'Localize, em cada linha, os elementos idênticos aos que estão no topo da imagem e marque-os utilizando a ferramenta de desenho. Você terá 3 minutos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Foque na atenção, não na velocidade.'
+    },
+    {
+      imagem: 'etapa3.png',
+      tempo: 120,
+      titulo: 'Etapa 3 – Atenção Alternada',
+      instrucao:
+        'Localize, em cada linha, o elemento igual ao que aparece antes da seta e marque-o. Você terá 2 minutos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Atenção é mais importante que rapidez.'
     }
+  ];
 
-    canvas {
-      border: 2px solid #444;
-      cursor: crosshair;
-      margin-top: 20px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-      max-width: 100%;
-      height: auto;
-      touch-action: none;
-    }
+  let etapaAtual = 0;
+  let tempoRestante = 0;
+  let timerInterval;
+  let desenhando = false;
+  let pincelLiberado = false;
 
-    #timer {
-      font-size: 24px;
-      margin: 20px 0;
-      color: black;
-    }
+  const telaInicial = document.getElementById('telaInicial');
+  const instrucoesEtapa = document.getElementById('instrucoesEtapa');
+  const conteudoTeste = document.getElementById('conteudoTeste');
+  const paginaFinal = document.getElementById('paginaFinal');
+  const btnComecar = document.getElementById('btnComecar');
+  const btnPronto = document.getElementById('btnPronto');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const timerDisplay = document.getElementById('timer');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const btnAvancar = document.getElementById('btnAvancar');
+  const tituloEtapa = document.getElementById('tituloEtapa');
+  const tituloInstrucao = document.getElementById('tituloInstrucao');
+  const textoInstrucao = document.getElementById('textoInstrucao');
+  const img = new Image();
 
-    button {
-      margin-top: 20px;
-      padding: 12px 24px;
-      font-size: 18px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      background-color: #007bff;
-      color: white;
-    }
+  btnComecar.onclick = () => {
+    telaInicial.style.display = 'none';
+    mostrarInstrucoes(etapaAtual);
+  };
 
-    #downloadBtn,
-    #btnAvancar,
-    #btnPronto {
-      display: none;
-    }
+  function mostrarInstrucoes(index) {
+    tituloInstrucao.textContent = etapas[index].titulo;
+    textoInstrucao.textContent = etapas[index].instrucao;
+    instrucoesEtapa.style.display = 'block';
+    btnPronto.style.display = 'inline-block';
+  }
 
-    #telaInicial,
-    #paginaFinal,
-    #instrucoesEtapa {
-      max-width: 700px;
-      margin: auto;
-      font-size: 18px;
-      padding: 20px;
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-  </style>
-</head>
+  btnPronto.onclick = () => {
+    instrucoesEtapa.style.display = 'none';
+    conteudoTeste.style.display = 'block';
+    iniciarEtapa(etapaAtual);
+  };
 
-<body>
-  <!-- Tela inicial -->
-  <div id="telaInicial">
-    <h1>Teste de Atenção</h1>
-    <p>Este teste será dividido em 3 etapas, cada uma focando em um tipo diferente de atenção.</p>
-    <button id="btnComecar">Começar</button>
-  </div>
+  function iniciarEtapa(index) {
+    pincelLiberado = false;
+    downloadBtn.style.display = 'none';
+    btnAvancar.style.display = 'none';
+    tituloEtapa.textContent = etapas[index].titulo;
+    tempoRestante = etapas[index].tempo;
+    timerDisplay.textContent = formatarTempo(tempoRestante);
+    img.src = etapas[index].imagem;
+  }
 
-  <!-- Instruções -->
-  <div id="instrucoesEtapa" style="display:none;">
-    <h2 id="tituloInstrucao"></h2>
-    <p id="textoInstrucao"></p>
-    <button id="btnPronto">Pronto</button>
-  </div>
+  img.onload = () => {
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+    pincelLiberado = true;
+    iniciarContagemRegressiva();
+  };
 
-  <!-- Conteúdo principal -->
-  <div id="conteudoTeste" style="display:none;">
-    <h2 id="tituloEtapa">Etapa</h2>
-    <div id="timer">Tempo restante</div>
-    <canvas id="canvas"></canvas>
-    <button id="downloadBtn">Baixar imagem com marcações</button>
-    <button id="btnAvancar">➡️ Próxima etapa</button>
-  </div>
-
-  <!-- Página final -->
-  <div id="paginaFinal" style="display:none;">
-    <h2>Parabéns! Você concluiu todas as etapas.</h2>
-    <p>Agora envie suas imagens com as marcações clicando no botão abaixo:</p>
-    <a href="https://forms.gle/S9V5Jh9jQHuqnVHs9" target="_blank">
-      <button>Enviar imagens</button>
-    </a>
-  </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const etapas = [
-        {
-          imagem: 'etapa1.png',
-          tempo: 60,
-          titulo: 'Etapa 1 – Atenção Concentrada',
-          instrucao:
-            'Localize, em cada linha, o esquilo que está no topo da imagem e marque-o utilizando a ferramenta de desenho. Você terá 1 minuto. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Não se preocupe com a velocidade, concentre-se na precisão.'
-        },
-        {
-          imagem: 'etapa2.png',
-          tempo: 180,
-          titulo: 'Etapa 2 – Atenção Dividida',
-          instrucao:
-            'Localize, em cada linha, os elementos idênticos aos que estão no topo da imagem e marque-os utilizando a ferramenta de desenho. Você terá 3 minutos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Foque na atenção, não na velocidade.'
-        },
-        {
-          imagem: 'etapa3.png',
-          tempo: 120,
-          titulo: 'Etapa 3 – Atenção Alternada',
-          instrucao:
-            'Localize, em cada linha, o elemento igual ao que aparece antes da seta e marque-o. Você terá 2 minutos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Atenção é mais importante que rapidez.'
-        }
-      ];
-
-      let etapaAtual = 0;
-      let tempoRestante = 0;
-      let timerInterval;
-      let desenhando = false;
-      let pincelLiberado = false;
-
-      const telaInicial = document.getElementById('telaInicial');
-      const instrucoesEtapa = document.getElementById('instrucoesEtapa');
-      const conteudoTeste = document.getElementById('conteudoTeste');
-      const paginaFinal = document.getElementById('paginaFinal');
-      const btnComecar = document.getElementById('btnComecar');
-      const btnPronto = document.getElementById('btnPronto');
-      const canvas = document.getElementById('canvas');
-      const ctx = canvas.getContext('2d');
-      const timerDisplay = document.getElementById('timer');
-      const downloadBtn = document.getElementById('downloadBtn');
-      const btnAvancar = document.getElementById('btnAvancar');
-      const tituloEtapa = document.getElementById('tituloEtapa');
-      const tituloInstrucao = document.getElementById('tituloInstrucao');
-      const textoInstrucao = document.getElementById('textoInstrucao');
-      const img = new Image();
-
-      // Botão inicial
-      btnComecar.onclick = () => {
-        telaInicial.style.display = 'none';
-        mostrarInstrucoes(etapaAtual);
-      };
-
-      function mostrarInstrucoes(index) {
-        tituloInstrucao.textContent = etapas[index].titulo;
-        textoInstrucao.textContent = etapas[index].instrucao;
-        instrucoesEtapa.style.display = 'block';
-        btnPronto.style.display = 'inline-block';
-      }
-
-      btnPronto.onclick = () => {
-        instrucoesEtapa.style.display = 'none';
-        conteudoTeste.style.display = 'block';
-        iniciarEtapa(etapaAtual);
-      };
-
-      function iniciarEtapa(index) {
-        pincelLiberado = false;
-        downloadBtn.style.display = 'none';
-        btnAvancar.style.display = 'none';
-        tituloEtapa.textContent = etapas[index].titulo;
-        tempoRestante = etapas[index].tempo;
-        timerDisplay.textContent = formatarTempo(tempoRestante);
-        img.src = etapas[index].imagem;
-      }
-
-      img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
-        pincelLiberado = true;
-        iniciarContagemRegressiva();
-      };
-
-      function iniciarContagemRegressiva() {
+  function iniciarContagemRegressiva() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      tempoRestante--;
+      timerDisplay.textContent = formatarTempo(tempoRestante);
+      if (tempoRestante <= 0) {
         clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-          tempoRestante--;
-          timerDisplay.textContent = formatarTempo(tempoRestante);
-
-          if (tempoRestante <= 0) {
-            clearInterval(timerInterval);
-            timerDisplay.textContent = 'Tempo encerrado!';
-            pincelLiberado = false;
-            downloadBtn.style.display = 'inline-block';
-          }
-        }, 1000);
+        timerDisplay.textContent = 'Tempo encerrado!';
+        pincelLiberado = false;
+        downloadBtn.style.display = 'inline-block';
       }
+    }, 1000);
+  }
 
-      function formatarTempo(segundos) {
-        const min = Math.floor(segundos / 60);
-        const sec = segundos % 60;
-        return `Tempo restante: ${min}:${sec < 10 ? '0' : ''}${sec}`;
-      }
+  function formatarTempo(segundos) {
+    const min = Math.floor(segundos / 60);
+    const sec = segundos % 60;
+    return `Tempo restante: ${min}:${sec < 10 ? '0' : ''}${sec}`;
+  }
 
-      // Desenho com mouse
-      canvas.onmousedown = (e) => {
-        if (!pincelLiberado || tempoRestante <= 0) return;
-        desenhando = true;
-        ctx.beginPath();
-        const rect = canvas.getBoundingClientRect();
-        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-      };
+  // --- Função auxiliar para coordenadas precisas ---
+  function getCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    let x, y;
 
-      canvas.onmouseup = () => {
-        desenhando = false;
-      };
+    if (e.touches && e.touches.length > 0) {
+      x = e.touches[0].clientX - rect.left;
+      y = e.touches[0].clientY - rect.top;
+    } else {
+      x = e.clientX - rect.left;
+      y = e.clientY - rect.top;
+    }
 
-      canvas.onmousemove = (e) => {
-        if (!desenhando || tempoRestante <= 0 || !pincelLiberado) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        ctx.lineWidth = 8;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#0026ff';
-        ctx.lineTo(x, y);
-        ctx.stroke();
-      };
+    // Corrige escala (caso o canvas esteja redimensionado)
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
 
-      // Desenho com toque
-      canvas.addEventListener('touchstart', (e) => {
-        if (!pincelLiberado || tempoRestante <= 0) return;
-        desenhando = true;
-        const touch = e.touches[0];
-        const rect = canvas.getBoundingClientRect();
-        const x = touch.clientX - rect.left;
-        const y = touch.clientY - rect.top;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        e.preventDefault();
-      });
+    return {
+      x: x * scaleX,
+      y: y * scaleY
+    };
+  }
 
-      canvas.addEventListener('touchmove', (e) => {
-        if (!desenhando || tempoRestante <= 0 || !pincelLiberado) return;
-        const touch = e.touches[0];
-        const rect = canvas.getBoundingClientRect();
-        const x = touch.clientX - rect.left;
-        const y = touch.clientY - rect.top;
-        ctx.lineWidth = 8;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#0026ff';
-        ctx.lineTo(x, y);
-        ctx.stroke();
-        e.preventDefault();
-      });
+  // --- Mouse ---
+  canvas.onmousedown = (e) => {
+    if (!pincelLiberado || tempoRestante <= 0) return;
+    desenhando = true;
+    const { x, y } = getCoords(e);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  };
 
-      canvas.addEventListener('touchend', () => {
-        desenhando = false;
-      });
+  canvas.onmouseup = () => {
+    desenhando = false;
+  };
 
-      // Download da imagem
-      downloadBtn.onclick = () => {
-        const link = document.createElement('a');
-        link.download = `etapa-${etapaAtual + 1}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        btnAvancar.style.display = 'inline-block';
-      };
+  canvas.onmousemove = (e) => {
+    if (!desenhando || tempoRestante <= 0 || !pincelLiberado) return;
+    const { x, y } = getCoords(e);
+    ctx.lineWidth = 8;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#0026ff';
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
 
-      // Avançar para a próxima etapa
-      btnAvancar.onclick = () => {
-        etapaAtual++;
-        if (etapaAtual < etapas.length) {
-          conteudoTeste.style.display = 'none';
-          mostrarInstrucoes(etapaAtual);
-        } else {
-          conteudoTeste.style.display = 'none';
-          paginaFinal.style.display = 'block';
-        }
-      };
-    });
-  </script>
-</body>
-</html>
+  // --- Touch corrigido ---
+  canvas.addEventListener('touchstart', (e) => {
+    if (!pincelLiberado || tempoRestante <= 0) return;
+    desenhando = true;
+    const { x, y } = getCoords(e);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    e.preventDefault();
+  });
+
+  canvas.addEventListener('touchmove', (e) => {
+    if (!desenhando || tempoRestante <= 0 || !pincelLiberado) return;
+    const { x, y } = getCoords(e);
+    ctx.lineWidth = 8;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#0026ff';
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    e.preventDefault();
+  });
+
+  canvas.addEventListener('touchend', () => {
+    desenhando = false;
+  });
+
+  // --- Download ---
+  downloadBtn.onclick = () => {
+    const link = document.createElement('a');
+    link.download = `etapa-${etapaAtual + 1}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    btnAvancar.style.display = 'inline-block';
+  };
+
+  // --- Avançar ---
+  btnAvancar.onclick = () => {
+    etapaAtual++;
+    if (etapaAtual < etapas.length) {
+      conteudoTeste.style.display = 'none';
+      mostrarInstrucoes(etapaAtual);
+    } else {
+      conteudoTeste.style.display = 'none';
+      paginaFinal.style.display = 'block';
+    }
+  };
+});
+</script>
