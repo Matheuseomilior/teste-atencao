@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Teste de Atenção</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <style>
@@ -11,6 +12,7 @@
       padding: 40px;
       background-color: #e6f2ff;
     }
+
     canvas {
       border: 2px solid #444;
       cursor: crosshair;
@@ -22,11 +24,13 @@
       height: auto;
       touch-action: none;
     }
+
     #timer {
       font-size: 24px;
       margin: 20px 0;
       color: black;
     }
+
     button {
       margin-top: 20px;
       padding: 12px 24px;
@@ -37,31 +41,43 @@
       background-color: #007bff;
       color: white;
     }
-    #downloadBtn, #btnAvancar, #btnPronto {
+
+    #downloadBtn,
+    #btnAvancar,
+    #btnPronto {
       display: none;
     }
-    #telaInicial, #paginaFinal, #instrucoesEtapa {
+
+    #telaInicial,
+    #paginaFinal,
+    #instrucoesEtapa {
       max-width: 700px;
       margin: auto;
       font-size: 18px;
       padding: 20px;
       background-color: white;
       border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
   </style>
 </head>
+
 <body>
+  <!-- Tela inicial -->
   <div id="telaInicial">
     <h1>Teste de Atenção</h1>
     <p>Este teste será dividido em 3 etapas, cada uma focando em um tipo diferente de atenção.</p>
     <button id="btnComecar">Começar</button>
   </div>
+
+  <!-- Instruções -->
   <div id="instrucoesEtapa" style="display:none;">
     <h2 id="tituloInstrucao"></h2>
     <p id="textoInstrucao"></p>
     <button id="btnPronto">Pronto</button>
   </div>
+
+  <!-- Conteúdo principal -->
   <div id="conteudoTeste" style="display:none;">
     <h2 id="tituloEtapa">Etapa</h2>
     <div id="timer">Tempo restante</div>
@@ -69,6 +85,8 @@
     <button id="downloadBtn">Baixar imagem com marcações</button>
     <button id="btnAvancar">➡️ Próxima etapa</button>
   </div>
+
+  <!-- Página final -->
   <div id="paginaFinal" style="display:none;">
     <h2>Parabéns! Você concluiu todas as etapas.</h2>
     <p>Agora envie suas imagens com as marcações clicando no botão abaixo:</p>
@@ -76,6 +94,7 @@
       <button>Enviar imagens</button>
     </a>
   </div>
+
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const etapas = [
@@ -83,21 +102,25 @@
           imagem: 'etapa1.png',
           tempo: 60,
           titulo: 'Etapa 1 – Atenção Concentrada',
-          instrucao: 'Localize, em cada linha, o esquilo que está no topo da imagem e marque-o utilizando a ferramenta de desenho. Você terá 1 minuto. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Não se preocupe com a velocidade, concentre-se na precisão.'
+          instrucao:
+            'Localize, em cada linha, o esquilo que está no topo da imagem e marque-o utilizando a ferramenta de desenho. Você terá 1 minuto. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Não se preocupe com a velocidade, concentre-se na precisão.'
         },
         {
           imagem: 'etapa2.png',
           tempo: 180,
           titulo: 'Etapa 2 – Atenção Dividida',
-          instrucao: 'Localize, em cada linha, os elementos idênticos aos que estão no topo da imagem e marque-os utilizando a ferramenta de desenho. Você terá 3 minutos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Foque na atenção, não na velocidade.'
+          instrucao:
+            'Localize, em cada linha, os elementos idênticos aos que estão no topo da imagem e marque-os utilizando a ferramenta de desenho. Você terá 3 minutos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Foque na atenção, não na velocidade.'
         },
         {
           imagem: 'etapa3.png',
           tempo: 120,
           titulo: 'Etapa 3 – Atenção Alternada',
-          instrucao: 'Localize, em cada linha, o elemento igual ao que aparece antes da seta e marque-o. Você terá 2 minutos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Atenção é mais importante que rapidez.'
+          instrucao:
+            'Localize, em cada linha, o elemento igual ao que aparece antes da seta e marque-o. Você terá 2 minutos. Faça uma linha por vez, da esquerda para a direita, de cima para baixo. Atenção é mais importante que rapidez.'
         }
       ];
+
       let etapaAtual = 0;
       let tempoRestante = 0;
       let timerInterval;
@@ -120,6 +143,7 @@
       const textoInstrucao = document.getElementById('textoInstrucao');
       const img = new Image();
 
+      // Botão inicial
       btnComecar.onclick = () => {
         telaInicial.style.display = 'none';
         mostrarInstrucoes(etapaAtual);
@@ -162,6 +186,7 @@
         timerInterval = setInterval(() => {
           tempoRestante--;
           timerDisplay.textContent = formatarTempo(tempoRestante);
+
           if (tempoRestante <= 0) {
             clearInterval(timerInterval);
             timerDisplay.textContent = 'Tempo encerrado!';
@@ -177,6 +202,7 @@
         return `Tempo restante: ${min}:${sec < 10 ? '0' : ''}${sec}`;
       }
 
+      // Desenho com mouse
       canvas.onmousedown = (e) => {
         if (!pincelLiberado || tempoRestante <= 0) return;
         desenhando = true;
@@ -184,9 +210,11 @@
         const rect = canvas.getBoundingClientRect();
         ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
       };
+
       canvas.onmouseup = () => {
         desenhando = false;
       };
+
       canvas.onmousemove = (e) => {
         if (!desenhando || tempoRestante <= 0 || !pincelLiberado) return;
         const rect = canvas.getBoundingClientRect();
@@ -199,6 +227,7 @@
         ctx.stroke();
       };
 
+      // Desenho com toque
       canvas.addEventListener('touchstart', (e) => {
         if (!pincelLiberado || tempoRestante <= 0) return;
         desenhando = true;
@@ -211,7 +240,7 @@
         e.preventDefault();
       });
 
-      canvas.addEventListener('touchmovecanvas.addEventListener('touchmove', (e) => {
+      canvas.addEventListener('touchmove', (e) => {
         if (!desenhando || tempoRestante <= 0 || !pincelLiberado) return;
         const touch = e.touches[0];
         const rect = canvas.getBoundingClientRect();
@@ -229,6 +258,7 @@
         desenhando = false;
       });
 
+      // Download da imagem
       downloadBtn.onclick = () => {
         const link = document.createElement('a');
         link.download = `etapa-${etapaAtual + 1}.png`;
@@ -237,6 +267,7 @@
         btnAvancar.style.display = 'inline-block';
       };
 
+      // Avançar para a próxima etapa
       btnAvancar.onclick = () => {
         etapaAtual++;
         if (etapaAtual < etapas.length) {
