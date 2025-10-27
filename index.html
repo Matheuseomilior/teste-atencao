@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
   <title>Teste de Atenção</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <style>
@@ -11,18 +11,27 @@
       text-align: center;
       padding: 40px;
       background-color: #e6f2ff;
+      overflow-x: hidden;
+    }
+
+    /* Container com rolagem para o canvas */
+    .canvas-container {
+      width: 100%;
+      max-width: 100%;
+      overflow: auto; /* permite rolagem horizontal e vertical */
+      margin: 0 auto;
+      border: 2px solid #444;
+      background-color: #fff;
+      border-radius: 8px;
     }
 
     canvas {
-      border: 2px solid #444;
-      cursor: crosshair;
-      margin-top: 20px;
       display: block;
-      margin-left: auto;
-      margin-right: auto;
-      max-width: 100%;
+      margin: 0 auto;
+      cursor: crosshair;
+      touch-action: pinch-zoom; /* permite zoom com dois dedos */
+      max-width: none; /* impede redimensionamento automático */
       height: auto;
-      touch-action: none;
     }
 
     #timer {
@@ -81,7 +90,12 @@
   <div id="conteudoTeste" style="display:none;">
     <h2 id="tituloEtapa">Etapa</h2>
     <div id="timer">Tempo restante</div>
-    <canvas id="canvas"></canvas>
+
+    <!-- Container do canvas -->
+    <div class="canvas-container">
+      <canvas id="canvas"></canvas>
+    </div>
+
     <button id="downloadBtn">Baixar imagem com marcações</button>
     <button id="btnAvancar">➡️ Próxima etapa</button>
   </div>
@@ -200,7 +214,7 @@
         return `Tempo restante: ${min}:${sec < 10 ? '0' : ''}${sec}`;
       }
 
-      // Corrige coordenadas com precisão (mouse e toque)
+      // Coordenadas precisas (mouse e toque)
       function getCoords(e) {
         const rect = canvas.getBoundingClientRect();
         let x, y;
@@ -213,14 +227,13 @@
           y = e.clientY - rect.top;
         }
 
-        // Ajuste para escala do canvas
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
 
         return { x: x * scaleX, y: y * scaleY };
       }
 
-      // Desenho com mouse
+      // Mouse
       canvas.onmousedown = (e) => {
         if (!pincelLiberado || tempoRestante <= 0) return;
         desenhando = true;
@@ -243,9 +256,10 @@
         ctx.stroke();
       };
 
-      // Desenho com toque (corrigido)
+      // Toque
       canvas.addEventListener('touchstart', (e) => {
         if (!pincelLiberado || tempoRestante <= 0) return;
+        if (e.touches.length > 1) return; // ignora zoom
         desenhando = true;
         const { x, y } = getCoords(e);
         ctx.beginPath();
@@ -255,6 +269,7 @@
 
       canvas.addEventListener('touchmove', (e) => {
         if (!desenhando || tempoRestante <= 0 || !pincelLiberado) return;
+        if (e.touches.length > 1) return; // ignora multitouch
         const { x, y } = getCoords(e);
         ctx.lineWidth = 8;
         ctx.lineCap = 'round';
@@ -292,3 +307,4 @@
   </script>
 </body>
 </html>
+
